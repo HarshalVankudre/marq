@@ -7,7 +7,7 @@ if (-not (Test-Path $src)) {
     Write-Error "marq.exe not found. Build first:`n  cd $PSScriptRoot\src-tauri; cargo build --release"
 }
 
-$dst = "$env:LOCALAPPDATA\Programs\Marq"
+$dst = "$env:LOCALAPPDATA\Marq"  # same location the NSIS installer uses
 New-Item -ItemType Directory -Force $dst | Out-Null
 
 # Stop a running instance so the exe can be replaced
