@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Marq</title>
+  <link rel="stylesheet" href="style.css" />
+  <style id="syntect"></style>
+</head>
+<body>
+  <header id="toolbar">
+    <span id="wordmark">Marq</span>
+    <span class="sep"></span>
+    <div id="file-label" title=""></div>
+    <div class="spacer"></div>
+    <div id="doc-meta"></div>
+    <button id="btn-theme" class="tool icon" type="button" title="Theme"></button>
+    <button id="btn-pdf" class="tool" type="button" title="Export as PDF (Ctrl+E)">Export PDF</button>
+  </header>
+
+  <main id="scroll">
+    <article id="doc" class="markdown-body" hidden></article>
+
+    <section id="welcome">
+      <h1 class="wm">Marq<span class="dot">.</span></h1>
+      <p class="tag">Markdown, beautifully typeset.</p>
+      <div class="actions">
+        <button id="btn-open" class="primary" type="button">Open a document</button>
+        <button id="btn-default" class="quiet" type="button">Make Marq the default</button>
+      </div>
+      <dl class="keys">
+        <div><dt>Ctrl E</dt><dd>Export PDF</dd></div>
+        <div><dt>Ctrl O</dt><dd>Open a document</dd></div>
+        <div><dt>Ctrl + −</dt><dd>Text size</dd></div>
+        <div><dt>drag &amp; drop</dt><dd>Open any .md file</dd></div>
+      </dl>
+      <p class="hint">Marq waits in the system tray, so documents open the instant you click them. Closing this window keeps it running; quit from the tray icon.</p>
+    </section>
+  </main>
+
+  <div id="drop-overlay" hidden><div>Drop to open</div></div>
+  <div id="toast" hidden></div>
+
+  <script src="main.js"></script>
+</body>
+</html>

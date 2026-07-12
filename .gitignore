@@ -1,0 +1,10 @@
+# Rust / Tauri build artifacts
+/src-tauri/target/
+/src-tauri/gen/
+
+# Node (only used transiently for the Tauri CLI)
+node_modules/
+package-lock.json
+
+# Local scratch
+*.log

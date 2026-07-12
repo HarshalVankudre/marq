@@ -1,0 +1,944 @@
+/* ==========================================================================
+   Marq — Markdown, beautifully typeset.
+
+   Voice: serif content (Sitka), quiet sans chrome (Segoe UI Variable),
+   ink-blue accent. Editorial discipline: hairlines, small caps, one accent.
+   ========================================================================== */
+
+:root {
+  --paper: #fbfaf8;
+  --surface: #f4f2ed;
+  --ink: #1d1e20;
+  --ink-soft: #3c3d40;
+  --muted: #6f6b63;
+  --faint: #a5a099;
+  --hairline: #e7e4dc;
+  --hairline-strong: #d8d4ca;
+  --accent: #3b4a9f;
+  --accent-deep: #2e3a80;
+  --code-bg: #f5f3ee;
+  --selection: #dfe3f5;
+  --note: #3b4a9f;
+  --tip: #3a7d4f;
+  --important: #7a4fb3;
+  --warning: #96690a;
+  --caution: #b23a32;
+
+  --serif: "Sitka Text", Sitka, Georgia, "Times New Roman", serif,
+    "Segoe UI Emoji";
+  --serif-display: "Sitka Display", "Sitka Heading", Sitka, Georgia, serif,
+    "Segoe UI Emoji";
+  --serif-heading: "Sitka Heading", Sitka, Georgia, serif, "Segoe UI Emoji";
+  --sans: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif,
+    "Segoe UI Emoji";
+  --sans-small: "Segoe UI Variable Small", "Segoe UI Variable Text", "Segoe UI",
+    system-ui, sans-serif, "Segoe UI Emoji";
+  --mono: "Cascadia Mono", "Cascadia Code", Consolas, ui-monospace, monospace,
+    "Segoe UI Emoji";
+}
+
+:root[data-theme="dark"] {
+  --paper: #1b1a18;
+  --surface: #232220;
+  --ink: #e6e3dc;
+  --ink-soft: #c9c6bf;
+  --muted: #98948b;
+  --faint: #6c6862;
+  --hairline: #34322d;
+  --hairline-strong: #45423b;
+  --accent: #a8b2ec;
+  --accent-deep: #c0c8f4;
+  --code-bg: #222120;
+  --selection: #333a58;
+  --note: #a8b2ec;
+  --tip: #82c096;
+  --important: #b9a0e6;
+  --warning: #d8a73f;
+  --caution: #e08078;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+::selection {
+  background: var(--selection);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+#welcome[hidden],
+#doc[hidden],
+#drop-overlay[hidden] {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------ toolbar */
+
+#toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  height: 46px;
+  flex: 0 0 auto;
+  border-bottom: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(12px);
+  user-select: none;
+  z-index: 5;
+}
+
+#wordmark {
+  font-family: var(--serif-heading);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+#toolbar .sep {
+  width: 1px;
+  height: 16px;
+  background: var(--hairline-strong);
+  display: none;
+}
+
+#file-label {
+  font-size: 12.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 46vw;
+}
+
+body.has-doc #toolbar .sep {
+  display: block;
+}
+
+.spacer {
+  flex: 1;
+}
+
+#doc-meta {
+  font-family: var(--sans-small);
+  font-size: 11.5px;
+  color: var(--faint);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+button.tool {
+  font-family: var(--sans-small);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  line-height: 1;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+button.tool:hover {
+  border-color: var(--muted);
+  color: var(--ink);
+}
+
+button.tool:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+button.tool.icon {
+  border-color: transparent;
+  padding: 5px 7px;
+  color: var(--muted);
+}
+
+button.tool.icon:hover {
+  color: var(--ink);
+  background: var(--surface);
+}
+
+button.tool.icon svg {
+  display: block;
+}
+
+/* ------------------------------------------------------------ scroll area */
+
+#scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overflow-anchor: none;
+}
+
+#scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+#scroll::-webkit-scrollbar-thumb {
+  background: var(--hairline-strong);
+  border-radius: 5px;
+  border: 3px solid var(--paper);
+}
+
+#scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--faint);
+}
+
+#scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ------------------------------------------------------------ welcome */
+
+#welcome {
+  min-height: calc(100vh - 46px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px 72px;
+  text-align: center;
+}
+
+#welcome .wm {
+  font-family: var(--serif-display);
+  font-size: 64px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+  line-height: 1.1;
+}
+
+#welcome .wm .dot {
+  color: var(--accent);
+}
+
+#welcome .tag {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--muted);
+  margin: 10px 0 34px;
+}
+
+#welcome .actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 44px;
+}
+
+#welcome .actions button {
+  font-family: var(--sans-small);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 11px 22px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+#welcome .actions button.primary {
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+}
+
+#welcome .actions button.primary:hover {
+  opacity: 0.88;
+}
+
+#welcome .actions button.quiet {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--hairline-strong);
+}
+
+#welcome .actions button.quiet:hover {
+  border-color: var(--muted);
+  color: var(--ink);
+}
+
+#welcome .keys {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 10px 40px;
+  margin: 0 0 40px;
+  padding: 22px 34px;
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+}
+
+#welcome .keys div {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+#welcome .keys dt {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 64px;
+  text-align: right;
+}
+
+#welcome .keys dd {
+  font-family: var(--sans-small);
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+#welcome .hint {
+  font-family: var(--sans-small);
+  font-size: 11.5px;
+  line-height: 1.8;
+  color: var(--faint);
+  max-width: 420px;
+  margin: 0;
+}
+
+/* ------------------------------------------------------------ document */
+
+.markdown-body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 52px 40px 128px;
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.72;
+  word-wrap: break-word;
+}
+
+.markdown-body > *:first-child {
+  margin-top: 0;
+}
+
+/* ---------------- headings: hierarchy through scale and space, not rules */
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  font-family: var(--serif-heading);
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+  scroll-margin-top: 24px;
+}
+
+.markdown-body h1 {
+  font-family: var(--serif-display);
+  font-size: 34px;
+  margin: 1.4em 0 0.55em;
+}
+
+.markdown-body h2 {
+  font-size: 25px;
+  margin: 2em 0 0.6em;
+}
+
+.markdown-body h3 {
+  font-size: 19.5px;
+  margin: 1.8em 0 0.55em;
+}
+
+.markdown-body h4 {
+  font-size: 17px;
+  margin: 1.6em 0 0.5em;
+}
+
+.markdown-body h5,
+.markdown-body h6 {
+  font-family: var(--sans-small);
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 1.8em 0 0.6em;
+}
+
+.markdown-body h1 .anchor,
+.markdown-body h2 .anchor,
+.markdown-body h3 .anchor,
+.markdown-body h4 .anchor,
+.markdown-body h5 .anchor,
+.markdown-body h6 .anchor {
+  display: none;
+}
+
+.markdown-body p {
+  margin: 0 0 1.05em;
+}
+
+.markdown-body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.markdown-body a:hover {
+  color: var(--accent-deep);
+  text-decoration-color: var(--accent);
+}
+
+.markdown-body strong {
+  font-weight: 650;
+}
+
+.markdown-body mark {
+  background: color-mix(in srgb, var(--warning) 22%, transparent);
+  color: var(--ink);
+  padding: 0.05em 0.2em;
+  border-radius: 2px;
+}
+
+/* Asterism divider instead of a rule — a book's section break. */
+.markdown-body hr {
+  border: 0;
+  margin: 2.6em 0;
+  text-align: center;
+}
+
+.markdown-body hr::after {
+  content: "· · ·";
+  font-family: var(--serif);
+  font-size: 18px;
+  letter-spacing: 0.6em;
+  margin-left: 0.6em;
+  color: var(--faint);
+}
+
+.markdown-body img {
+  max-width: 100%;
+  border-radius: 3px;
+  border: 1px solid var(--hairline);
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.6em;
+  margin: 0 0 1.05em;
+}
+
+.markdown-body li {
+  margin: 0.28em 0;
+}
+
+.markdown-body li::marker {
+  color: var(--faint);
+}
+
+.markdown-body li > p {
+  margin-bottom: 0.45em;
+}
+
+/* ---------------- task lists: custom square checks */
+
+.markdown-body ul.contains-task-list {
+  list-style: none;
+  padding-left: 0.2em;
+}
+
+.markdown-body .task-list-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.markdown-body .task-list-item input[type="checkbox"] {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  translate: 0 2px;
+  margin: 0;
+  border: 1.5px solid var(--hairline-strong);
+  border-radius: 3px;
+  background: transparent;
+}
+
+.markdown-body .task-list-item input[type="checkbox"]:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E");
+  background-size: 11px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+:root[data-theme="dark"]
+  .markdown-body
+  .task-list-item
+  input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%231b1a18' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E");
+}
+
+/* ---------------- code */
+
+.markdown-body code,
+.markdown-body kbd,
+.markdown-body samp {
+  font-family: var(--mono);
+}
+
+.markdown-body code {
+  background: var(--surface);
+  padding: 0.12em 0.38em;
+  border-radius: 3px;
+  font-size: 80%;
+}
+
+.markdown-body pre {
+  position: relative;
+  background: var(--code-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 16px 18px;
+  overflow-x: auto;
+  margin: 0.2em 0 1.3em;
+  line-height: 1.55;
+}
+
+.markdown-body pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: 13px;
+  white-space: pre;
+}
+
+.markdown-body pre[data-lang]::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 9px;
+  right: 12px;
+  font-family: var(--sans-small);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.markdown-body pre:hover[data-lang]::before {
+  opacity: 0;
+}
+
+.markdown-body pre .copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-family: var(--sans-small);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--hairline-strong);
+  background: var(--paper);
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.markdown-body pre:hover .copy-btn {
+  opacity: 1;
+}
+
+.markdown-body pre .copy-btn:hover {
+  color: var(--ink);
+  border-color: var(--muted);
+}
+
+.markdown-body kbd {
+  display: inline-block;
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0.08em 0.5em;
+  font-size: 0.72em;
+  vertical-align: 0.08em;
+}
+
+/* ---------------- quotes & alerts: the shared margin column */
+
+.markdown-body blockquote {
+  margin: 0.2em 0 1.2em;
+  padding: 0.1em 0 0.1em 1.3em;
+  border-left: 2px solid var(--hairline-strong);
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.markdown-body blockquote blockquote {
+  font-style: normal;
+}
+
+.markdown-body blockquote > :first-child {
+  margin-top: 0.35em;
+}
+
+.markdown-body blockquote > :last-child {
+  margin-bottom: 0.35em;
+}
+
+.markdown-alert {
+  margin: 0.2em 0 1.3em;
+  padding: 0.55em 0 0.55em 1.3em;
+  border-left: 2px solid var(--hairline-strong);
+}
+
+.markdown-alert > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-alert .markdown-alert-title {
+  font-family: var(--sans-small);
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  margin: 0 0 0.35em;
+}
+
+.markdown-alert p {
+  margin-bottom: 0.4em;
+  font-size: 15.5px;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--note);
+}
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--note);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--tip);
+}
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--tip);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--important);
+}
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--warning);
+}
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--warning);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--caution);
+}
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--caution);
+}
+
+/* ---------------- tables: horizontal rules only, like a book */
+
+.markdown-body table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 0.3em 0 1.4em;
+  font-size: 15px;
+}
+
+.markdown-body thead th {
+  font-family: var(--sans-small);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 2px solid var(--ink);
+  padding: 6px 16px 8px 2px;
+  text-align: left;
+}
+
+:root[data-theme="dark"] .markdown-body thead th {
+  border-bottom-color: var(--ink-soft);
+}
+
+.markdown-body td {
+  border-bottom: 1px solid var(--hairline);
+  padding: 8px 16px 8px 2px;
+}
+
+.markdown-body th[align="center"],
+.markdown-body td[align="center"] {
+  text-align: center;
+}
+
+.markdown-body th[align="right"],
+.markdown-body td[align="right"] {
+  text-align: right;
+}
+
+/* ---------------- details, footnotes, definition lists */
+
+.markdown-body details {
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 12px 18px;
+  margin: 0.2em 0 1.3em;
+}
+
+.markdown-body details summary {
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  user-select: none;
+  color: var(--ink-soft);
+}
+
+.markdown-body details summary:hover {
+  color: var(--ink);
+}
+
+.markdown-body details[open] summary {
+  margin-bottom: 10px;
+}
+
+.markdown-body .footnotes {
+  margin-top: 52px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.markdown-body .footnotes::before {
+  content: "";
+  display: block;
+  width: 88px;
+  height: 1px;
+  background: var(--hairline-strong);
+  margin-bottom: 18px;
+}
+
+.markdown-body .footnotes p {
+  margin-bottom: 0.4em;
+}
+
+.markdown-body sup a {
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Render the ↩ backref as text, not as a color emoji glyph. */
+.markdown-body .footnote-backref {
+  font-size: 0;
+  text-decoration: none;
+}
+
+.markdown-body .footnote-backref::after {
+  content: "\21A9\FE0E";
+  font-size: 13px;
+}
+
+.markdown-body dl dt {
+  font-weight: 650;
+  margin-top: 0.8em;
+}
+
+.markdown-body dl dd {
+  margin-left: 1.5em;
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------------ overlays */
+
+#drop-overlay {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  pointer-events: none;
+}
+
+#drop-overlay div {
+  font-family: var(--serif-heading);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--ink);
+  border: 1.5px dashed var(--muted);
+  border-radius: 6px;
+  padding: 26px 54px;
+  background: var(--paper);
+}
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans-small);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 10px 20px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 60;
+  max-width: 80vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ------------------------------------------------------------ print / PDF */
+
+@media print {
+  #toolbar,
+  #toast,
+  #drop-overlay,
+  .copy-btn,
+  #welcome {
+    display: none !important;
+  }
+
+  body {
+    overflow: visible;
+    display: block;
+    background: #fff;
+  }
+
+  #scroll {
+    overflow: visible;
+  }
+
+  .markdown-body {
+    max-width: 100%;
+    padding: 0;
+    font-size: 12px;
+    line-height: 1.62;
+    zoom: 1 !important;
+  }
+
+  .markdown-body h1 {
+    font-size: 26px;
+  }
+
+  .markdown-body h2 {
+    font-size: 19px;
+  }
+
+  .markdown-body h3 {
+    font-size: 15px;
+  }
+
+  .markdown-body pre,
+  .markdown-body code,
+  .markdown-body thead th,
+  .markdown-alert,
+  .markdown-body kbd,
+  .markdown-body details,
+  .markdown-body mark,
+  .markdown-body .task-list-item input[type="checkbox"] {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .markdown-body pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .markdown-body pre code {
+    white-space: pre-wrap;
+    font-size: 10.5px;
+  }
+
+  .markdown-body pre[data-lang]::before {
+    display: none;
+  }
+
+  .markdown-body h1,
+  .markdown-body h2,
+  .markdown-body h3 {
+    break-after: avoid;
+  }
+
+  .markdown-body table,
+  .markdown-body img,
+  .markdown-alert,
+  .markdown-body pre {
+    break-inside: avoid;
+  }
+
+  .markdown-body table {
+    display: table;
+    width: 100%;
+  }
+}

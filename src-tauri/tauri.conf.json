@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Marq",
+  "version": "1.0.0",
+  "identifier": "com.marq.viewer",
+  "build": {
+    "frontendDist": "../ui"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Marq",
+        "width": 1080,
+        "height": 800,
+        "minWidth": 420,
+        "minHeight": 320,
+        "center": true,
+        "visible": false,
+        "dragDropEnabled": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost https://asset.localhost data: blob: https: http:; media-src 'self' asset: http://asset.localhost https://asset.localhost; font-src 'self' data:; connect-src ipc: http://ipc.localhost https://ipc.localhost",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["**"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "Harshal Vankudre",
+    "shortDescription": "Markdown, beautifully typeset",
+    "longDescription": "Marq is an instant Markdown reader for Windows: it lives in your tray, opens .md files the moment you click them, renders them beautifully typeset, and exports print-quality PDFs.",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/icon.ico"],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerHooks": "./installer.nsh"
+      }
+    }
+  }
+}
